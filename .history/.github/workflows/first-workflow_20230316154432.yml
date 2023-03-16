@@ -1,0 +1,19 @@
+name: detect-workflow 
+on:
+  push:
+    branches:
+      - master
+      - main 
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: .github/backend/backend-filters.yaml
+    # run only if some file in 'src' folder was changed
+      - if: steps.changes.outputs.src == 'true'
+        run: echo "hello world"
+
