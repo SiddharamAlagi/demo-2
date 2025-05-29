@@ -8,17 +8,27 @@ on:
         required: true
 
 jobs:
-  promote:
+  promote-latest:
     name: Promote selected version to latest tag
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Required to push tags
+      contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Promote version to latest using EndBug/latest-tag
-        uses: EndBug/latest-tag@v1
         with:
-          tag: ${{ github.event.inputs.version }}
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+      - name: Delete old 'latest' tag (if exists)
+        run: |
+          git tag -d latest || echo "No local latest tag"
+          git push origin :refs/tags/latest || echo "No remote latest tag"
+      - name: Create new 'latest' tag pointing to ${{ github.event.inputs.version }}
+        run: |
+          git tag latest ${{ github.event.inputs.version }}
+          git push origin latest
